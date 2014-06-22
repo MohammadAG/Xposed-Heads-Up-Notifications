@@ -12,16 +12,19 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
-        <activity android:name="com.mohammadag.headsupenabler.SettingsActivity">
+        <activity android:name="com.mohammadag.headsupenabler.SettingsActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.mohammadag.headsupenabler.Blacklist">
+        <activity
+            android:name="com.mohammadag.headsupenabler.Blacklist"
+            android:label="@string/pref_blacklist_title" >
             <intent-filter>
                 <action android:name="com.mohammadag.headsupenabler.BLACKLIST" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
