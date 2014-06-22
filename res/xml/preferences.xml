@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <EditTextPreference
-        android:key="heads_up_notification_decay"
-        android:defaultValue="3700"
-        android:numeric="integer"
-        android:title="@string/heads_up_notification_decay_title"
-        android:summary="@string/heads_up_notification_decay_summary" />
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <Preference
-        android:title="@string/blacklist_title"
-        android:summary="@string/blacklist_summary">
-        <intent android:action="com.mohammadag.headsupenabler.BLACKLIST" />
+        android:key="copyright_key"
+        android:summary="@string/copyright_summary"
+        android:title="@string/app_name" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="http://forum.xda-developers.com/xposed/modules/mod-heads-notifications-t2791217" />
     </Preference>
 
+    <CheckBoxPreference
+        android:key="enabled_for_ongoing_notifications"
+        android:summary="@string/pref_ongoing_summary"
+        android:title="@string/pref_ongoing_title" />
+
+    <EditTextPreference
+        android:defaultValue="3700"
+        android:key="heads_up_notification_decay"
+        android:numeric="integer"
+        android:summary="@string/heads_up_notification_decay_summary"
+        android:title="@string/heads_up_notification_decay_title" />
+
+    <Preference
+        android:summary="@string/blacklist_summary"
+        android:title="@string/blacklist_title" >
+        <intent android:action="com.mohammadag.headsupenabler.BLACKLIST" />
+    </Preference>
 
 </PreferenceScreen>

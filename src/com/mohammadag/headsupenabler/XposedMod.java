@@ -32,10 +32,12 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 				new XC_MethodReplacement() {
 					@Override
 					protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-						String packageName = ((StatusBarNotification) param.args[0]).getPackageName();
+						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
-						return powerManager.isScreenOn() && !mSettingsHelper.isListed(packageName);
+						if (n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
+							return false;
+						return powerManager.isScreenOn() && !mSettingsHelper.isListed(n.getPackageName());
 					}
 				}
 		);
@@ -67,8 +69,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
 				Settings.Global.putInt(mContext.getContentResolver(), "heads_up_enabled", 1);
 			}
-
-			;
 		});
 	}
 
