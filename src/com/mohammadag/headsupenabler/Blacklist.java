@@ -1,5 +1,10 @@
 package com.mohammadag.headsupenabler;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -13,15 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class Blacklist extends PreferenceActivity {
     private static SettingsHelper mSettingsHelper;
@@ -33,7 +33,6 @@ public class Blacklist extends PreferenceActivity {
         mSettingsHelper = new SettingsHelper(this);
         new LoadAppsInfoTask().execute();
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setTitle(R.string.pref_blacklist_title);
     }
 
 	@Override
@@ -90,7 +89,7 @@ public class Blacklist extends PreferenceActivity {
             ImageView icon;
             TextView title;
             TextView summary;
-            Switch switch_;
+            CheckBox checkbox;
         }
 
         @Override
@@ -105,7 +104,7 @@ public class Blacklist extends PreferenceActivity {
                 holder.icon = (ImageView) view.findViewById(R.id.icon);
                 holder.title = (TextView) view.findViewById(android.R.id.title);
                 holder.summary = (TextView) view.findViewById(android.R.id.summary);
-                holder.switch_ = (Switch) view.findViewById(R.id.switch_);
+                holder.checkbox = (CheckBox) view.findViewById(R.id.checkbox);
                 view.setTag(holder);
             } else {
                 view = convertView;
@@ -116,9 +115,9 @@ public class Blacklist extends PreferenceActivity {
             holder.summary.setText(item.summary);
             holder.icon.setImageDrawable(item.icon);
 
-            holder.switch_.setOnCheckedChangeListener(null);
-            holder.switch_.setChecked(item.enabled);
-            holder.switch_.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            holder.checkbox.setOnCheckedChangeListener(null);
+            holder.checkbox.setChecked(item.enabled);
+            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                     item.enabled = isChecked;
