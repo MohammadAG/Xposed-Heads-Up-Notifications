@@ -65,4 +65,8 @@ public class SettingsHelper {
             return mXSharedPreferences.getStringSet(BLACKLIST, set);
         return set;
     }
+
+	public int getHeadsUpNotificationDecay() {
+		return Integer.parseInt(mXSharedPreferences.getString("heads_up_notification_decay", "3700"));
+	}
 }

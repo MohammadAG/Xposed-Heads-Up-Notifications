@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -31,10 +32,18 @@ public class Blacklist extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         mSettingsHelper = new SettingsHelper(this);
         new LoadAppsInfoTask().execute();
+		getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setTitle(R.string.pref_blacklist_title);
     }
 
-    private static class AppInfo {
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == android.R.id.home)
+			onBackPressed();
+		return true;
+	}
+
+	private static class AppInfo {
         String title;
         String summary;
         Drawable icon;
