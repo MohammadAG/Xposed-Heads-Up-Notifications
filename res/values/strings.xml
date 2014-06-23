@@ -1,7 +1,16 @@
 <resources>
 
     <string name="app_name">Heads Up Notifications</string>
+    <string name="copyright_summary">Copyright © 2014 – MohammadAG / GermainZ\nVisit support thread</string>
     <string name="pref_blacklist_title">Blacklist</string>
     <string name="loading">Loading…</string>
+    <string name="heads_up_notification_decay_title">Notification delay</string>
+    <string name="heads_up_notification_decay_summary">Delay (in ms) before the Heads Up notification
+        disappears. A reboot is required to apply this option</string>
+    <string name="blacklist_title">Blacklist</string>
+    <string name="blacklist_summary">Ignore notifications from certain apps</string>
+    <string name="pref_ongoing_title">Ongoing notifications</string>
+    <string name="pref_ongoing_summary">Enable heads up for ongoing (persistent) notifications</string>
+    <string name="app_icon_cd">Application icon</string>
 
 </resources>
