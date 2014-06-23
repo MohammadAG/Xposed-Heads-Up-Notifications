@@ -1,11 +1,9 @@
 package com.mohammadag.headsupenabler;
 
+import java.util.HashSet;
+
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import java.util.HashSet;
-import java.util.Set;
-
 import de.robv.android.xposed.XSharedPreferences;
 
 public class SettingsHelper {
@@ -15,7 +13,7 @@ public class SettingsHelper {
 	private XSharedPreferences mXSharedPreferences = null;
 	private SharedPreferences mSharedPreferences = null;
 	private Context mContext = null;
-	private Set<String> mListItems;
+	private HashSet<String> mListItems;
 
 	// Called from module's classes.
 	public SettingsHelper() {
@@ -55,8 +53,8 @@ public class SettingsHelper {
 		return mListItems.contains(s);
 	}
 
-	public Set<String> getListItems() {
-		Set<String> set = new HashSet<String>();
+	public HashSet<String> getListItems() {
+		HashSet<String> set = new HashSet<String>();
 		if (mSharedPreferences != null)
 			set.addAll(mSharedPreferences.getStringSet(BLACKLIST, set));
 		else if (mXSharedPreferences != null)
