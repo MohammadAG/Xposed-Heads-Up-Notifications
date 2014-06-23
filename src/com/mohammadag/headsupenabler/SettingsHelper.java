@@ -58,9 +58,9 @@ public class SettingsHelper {
 	public Set<String> getListItems() {
 		Set<String> set = new HashSet<String>();
 		if (mSharedPreferences != null)
-			return mSharedPreferences.getStringSet(BLACKLIST, set);
+			set.addAll(mSharedPreferences.getStringSet(BLACKLIST, set));
 		else if (mXSharedPreferences != null)
-			return mXSharedPreferences.getStringSet(BLACKLIST, set);
+			set.addAll(mXSharedPreferences.getStringSet(BLACKLIST, set));
 		return set;
 	}
 
