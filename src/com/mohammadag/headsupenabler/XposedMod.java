@@ -1,9 +1,5 @@
 package com.mohammadag.headsupenabler;
 
-import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
-import static de.robv.android.xposed.XposedHelpers.getObjectField;
-import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
-import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,13 +9,20 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.MotionEvent;
+
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
+
+import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.getObjectField;
+import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.setObjectField;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
 	private static SettingsHelper mSettingsHelper;
@@ -42,8 +45,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
-						if (n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
-							return false;
 						return powerManager.isScreenOn() && !mSettingsHelper.isListed(n.getPackageName());
 					}
 				}
@@ -58,11 +59,23 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			}
 		});
 
+        XposedBridge.hookAllMethods(HeadsUpNotificationView, "setNotification", new XC_MethodHook() {
+            final int NOTIFICATION_DATA_ENTRY = 0;
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                StatusBarNotification n = (StatusBarNotification) getObjectField(param.args[NOTIFICATION_DATA_ENTRY], "notification");
+                if (n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications()) {
+                    param.setResult(false);
+                }
+            }
+        });
+
 		Class<?> ExpandHelper = XposedHelpers.findClass("com.android.systemui.ExpandHelper", lpparam.classLoader);
 		XposedHelpers.findAndHookMethod(ExpandHelper, "onInterceptTouchEvent", MotionEvent.class, new XC_MethodHook() {
+            final int MOTION_EVENT = 0;
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-				int action = ((MotionEvent) param.args[0]).getAction();
+				int action = ((MotionEvent) param.args[MOTION_EVENT]).getAction();
 				Object headsUp = getAdditionalInstanceField(param.thisObject, "headsUp");
 				if (headsUp != null && (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
 					setObjectField(param.thisObject, "mWatchingForPull", true);
@@ -111,6 +124,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		}
 
 		resparam.res.setReplacement("com.android.systemui", "integer", "heads_up_notification_decay",
-				mSettingsHelper.getHeadsUpNotificationDecay());
+                mSettingsHelper.getHeadsUpNotificationDecay());
 	}
 }
