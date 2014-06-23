@@ -1,5 +1,7 @@
 <resources>
 
     <string name="app_name">Heads Up Notifications</string>
+    <string name="pref_blacklist_title">Blacklist</string>
+    <string name="loading">Loading…</string>
 
 </resources>
