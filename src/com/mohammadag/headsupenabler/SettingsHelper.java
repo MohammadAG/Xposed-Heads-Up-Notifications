@@ -35,12 +35,11 @@ public class SettingsHelper {
 		mListItems = getListItems();
 	}
 
-	public boolean addListItem(String listItem) {
+	public void addListItem(String listItem) {
 		mListItems.add(listItem);
 		SharedPreferences.Editor prefEditor = mSharedPreferences.edit();
 		prefEditor.putStringSet(BLACKLIST, mListItems);
 		prefEditor.apply();
-		return true;
 	}
 
 	public void removeListItem(String listItem) {
