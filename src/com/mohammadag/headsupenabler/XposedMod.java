@@ -64,11 +64,9 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
-						// Ignore if the notification is ongoing and we haven't enabled that in the settings
-						return !(n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
-								// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
-								// enabled
-								&& !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
+						// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
+						// enabled
+						return !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
 								&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
 								// Screen must be on
 								&& powerManager.isScreenOn()
@@ -84,6 +82,18 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 				setAdditionalInstanceField(getObjectField(param.thisObject, "mExpandHelper"), "headsUp", true);
+			}
+		});
+		
+		XposedBridge.hookAllMethods(HeadsUpNotificationView, "setNotification", new XC_MethodHook() {
+		final int NOTIFICATION_DATA_ENTRY = 0;
+
+			@Override
+			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+ 				StatusBarNotification n = (StatusBarNotification) getObjectField(param.args[NOTIFICATION_DATA_ENTRY], "notification");
+				if (n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications()) {
+					param.setResult(false);
+				}
 			}
 		});
 
