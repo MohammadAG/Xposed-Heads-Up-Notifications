@@ -115,18 +115,18 @@ public class Blacklist extends PreferenceActivity {
             holder.summary.setText(item.summary);
             holder.icon.setImageDrawable(item.icon);
 
-            holder.checkbox.setOnCheckedChangeListener(null);
             holder.checkbox.setChecked(item.enabled);
-            holder.checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                    item.enabled = isChecked;
-                    if (isChecked)
-                        mSettingsHelper.addListItem(item.summary);
-                    else
-                        mSettingsHelper.removeListItem(item.summary);
-                }
-            });
+            holder.checkbox.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					item.enabled = holder.checkbox.isChecked();
+					if (holder.checkbox.isChecked()) {
+						mSettingsHelper.addListItem(item.summary);
+					} else {
+						mSettingsHelper.removeListItem(item.summary);
+					}
+				}
+			});
 
             return view;
         }
