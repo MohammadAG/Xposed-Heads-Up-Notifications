@@ -4,6 +4,7 @@ import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,8 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
+
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -24,11 +27,30 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
 	private static SettingsHelper mSettingsHelper;
 	private BroadcastReceiver mBroadcastReceiver;
+	private BroadcastReceiver mStatusBarBroadcastReceiver;
+	private int mStatusBarVisibility;
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-		if (!lpparam.packageName.equals("com.android.systemui"))
+		if (lpparam.packageName.equals("android")) {
+			Class<?> WindowManagerService = XposedHelpers.findClass("com.android.server.wm.WindowManagerService",
+					lpparam.classLoader);
+			XposedHelpers.findAndHookMethod(WindowManagerService, "statusBarVisibilityChanged", int.class,
+					new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							int statusBarVisibility = (Integer) getObjectField(param.thisObject,
+									"mLastStatusBarVisibility");
+							Context context = (Context) getObjectField(param.thisObject, "mContext");
+							Intent intent = new Intent("com.mohammadag.headsupenabler.STATUS_BAR_VISIBILITY_UPDATED");
+							intent.putExtra("statusBarVisibility", statusBarVisibility);
+							context.sendBroadcast(intent);
+						}
+					}
+			);
+		} else if (!lpparam.packageName.equals("com.android.systemui")) {
 			return;
+		}
 
 		if (mSettingsHelper == null) {
 			mSettingsHelper = new SettingsHelper();
@@ -42,9 +64,16 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
-						if (n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
-							return false;
-						return powerManager.isScreenOn() && !mSettingsHelper.isListed(n.getPackageName());
+						// Ignore if the notification is ongoing and we haven't enabled that in the settings
+						return !(n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
+								// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
+								// enabled
+								&& !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
+								&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
+								// Screen must be on
+								&& powerManager.isScreenOn()
+								// Check if package is blacklisted
+								&& !mSettingsHelper.isListed(n.getPackageName());
 					}
 				}
 		);
@@ -86,8 +115,16 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						Settings.Global.putInt(context.getContentResolver(), "heads_up_enabled", 0);
 					}
 				};
+				mStatusBarBroadcastReceiver = new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						mStatusBarVisibility = intent.getIntExtra("statusBarVisibility", 0);
+					}
+				};
 
 				mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
+				mContext.registerReceiver(mStatusBarBroadcastReceiver,
+						new IntentFilter("com.mohammadag.headsupenabler.STATUS_BAR_VISIBILITY_UPDATED"));
 				Settings.Global.putInt(mContext.getContentResolver(), "heads_up_enabled", 1);
 			}
 		});

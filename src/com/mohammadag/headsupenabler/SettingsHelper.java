@@ -69,4 +69,8 @@ public class SettingsHelper {
 	public boolean isEnabledForOngoingNotifications() {
 		return mXSharedPreferences.getBoolean("enabled_for_ongoing_notifications", false);
 	}
+
+	public boolean isEnabledOnlyWhenFullscreen() {
+		return mXSharedPreferences.getBoolean("enabled_only_when_fullscreen", false);
+	}
 }
