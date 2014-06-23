@@ -11,6 +11,8 @@
     <string name="blacklist_summary">Ignore notifications from certain apps</string>
     <string name="pref_ongoing_title">Ongoing notifications</string>
     <string name="pref_ongoing_summary">Enable heads up for ongoing (persistent) notifications</string>
+    <string name="pref_fullscreen_title">Only when fullscreen</string>
+    <string name="pref_fullscreen_summary">Enable Heads Up only when in fullscreen apps</string>
     <string name="app_icon_cd">Application icon</string>
 
 </resources>
