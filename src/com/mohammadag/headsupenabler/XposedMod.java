@@ -1,9 +1,12 @@
 package com.mohammadag.headsupenabler;
 
+import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
+import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
+import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -20,8 +23,6 @@ import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
@@ -33,9 +34,13 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
 		if (lpparam.packageName.equals("android")) {
-			Class<?> WindowManagerService = XposedHelpers.findClass("com.android.server.wm.WindowManagerService",
+			/*
+			* Monitor the status bar's visibility and send a broadcast so that we can know if it's not visible
+			* (fullscreen activity) when displaying Heads Ups.
+			*/
+			Class<?> WindowManagerService = findClass("com.android.server.wm.WindowManagerService",
 					lpparam.classLoader);
-			XposedHelpers.findAndHookMethod(WindowManagerService, "statusBarVisibilityChanged", int.class,
+			findAndHookMethod(WindowManagerService, "statusBarVisibilityChanged", int.class,
 					new XC_MethodHook() {
 						@Override
 						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -56,8 +61,11 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			mSettingsHelper = new SettingsHelper();
 		}
 
-		Class<?> BaseStatusBar = XposedHelpers.findClass("com.android.systemui.statusbar.BaseStatusBar", lpparam.classLoader);
-		XposedHelpers.findAndHookMethod(BaseStatusBar, "shouldInterrupt", StatusBarNotification.class,
+		/*
+		* Determine when to show a Heads Up notification.
+		*/
+		Class<?> BaseStatusBar = findClass("com.android.systemui.statusbar.BaseStatusBar", lpparam.classLoader);
+		findAndHookMethod(BaseStatusBar, "shouldInterrupt", StatusBarNotification.class,
 				new XC_MethodReplacement() {
 					@Override
 					protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
@@ -69,7 +77,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 								// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
 								// enabled
 								&& !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
-								&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
+									&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
 								// Screen must be on
 								&& powerManager.isScreenOn()
 								// Check if package is blacklisted
@@ -78,24 +86,30 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 				}
 		);
 
-		Class<?> NotificationDataEntry = XposedHelpers.findClass("com.android.systemui.statusbar.NotificationData$Entry",
+		/*
+		 * Stop breaking the normal notification ordering.
+		 * The current AOSP implementation considers the interruption state (= has it been shown to the user using a
+		 * Heads Up?) more important than the notification's score when comparing notifications (to set the order).
+		 * This breaks the normal order of notifications, so we're nuking the method that sets the interruption state.
+		 */
+		Class<?> NotificationDataEntry = findClass("com.android.systemui.statusbar.NotificationData$Entry",
 				lpparam.classLoader);
-		// The current AOSP implementation considers the interruption state (= has it been shown to the user using a
-		// Heads Up?) more important than the notification's score when comparing notifications (to set the order).
-		// This breaks the normal order of notifications, so we're nuking the method that sets the interruption state.
-		XposedHelpers.findAndHookMethod(NotificationDataEntry, "setInterruption", XC_MethodReplacement.DO_NOTHING);
+		findAndHookMethod(NotificationDataEntry, "setInterruption", XC_MethodReplacement.DO_NOTHING);
 
-		Class<?> HeadsUpNotificationView = XposedHelpers.findClass("com.android.systemui.statusbar.policy.HeadsUpNotificationView",
+		/*
+		 * Enable one handed expansion for the Heads Up view.
+		 */
+		Class<?> HeadsUpNotificationView = findClass("com.android.systemui.statusbar.policy.HeadsUpNotificationView",
 				lpparam.classLoader);
-		XposedHelpers.findAndHookMethod(HeadsUpNotificationView, "onAttachedToWindow", new XC_MethodHook() {
+		findAndHookMethod(HeadsUpNotificationView, "onAttachedToWindow", new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 				setAdditionalInstanceField(getObjectField(param.thisObject, "mExpandHelper"), "headsUp", true);
 			}
 		});
 
-		Class<?> ExpandHelper = XposedHelpers.findClass("com.android.systemui.ExpandHelper", lpparam.classLoader);
-		XposedHelpers.findAndHookMethod(ExpandHelper, "onInterceptTouchEvent", MotionEvent.class, new XC_MethodHook() {
+		Class<?> ExpandHelper = findClass("com.android.systemui.ExpandHelper", lpparam.classLoader);
+		findAndHookMethod(ExpandHelper, "onInterceptTouchEvent", MotionEvent.class, new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 				int action = ((MotionEvent) param.args[0]).getAction();
@@ -106,8 +120,11 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			}
 		});
 
-		/* Users won't use adb or terminal, force it upon that */
-		XposedHelpers.findAndHookMethod(BaseStatusBar, "start", new XC_MethodHook() {
+		/*
+		 * Enable the Heads Up system setting on startup, disable it on module removal.
+		 * Also handle status bar visibility changes.
+		 */
+		findAndHookMethod(BaseStatusBar, "start", new XC_MethodHook() {
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
 				mBroadcastReceiver = new BroadcastReceiver() {
@@ -136,7 +153,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			}
 		});
 
-		XposedHelpers.findAndHookMethod(BaseStatusBar, "destroy", new XC_MethodHook() {
+		findAndHookMethod(BaseStatusBar, "destroy", new XC_MethodHook() {
 			@Override
 			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
@@ -146,7 +163,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 	}
 
 	@Override
-	public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resparam) throws Throwable {
+	public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable {
 		if (!resparam.packageName.equals("com.android.systemui"))
 			return;
 
@@ -154,6 +171,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			mSettingsHelper = new SettingsHelper();
 		}
 
+		// Set the delay before the Heads Up notification is hidden.
 		resparam.res.setReplacement("com.android.systemui", "integer", "heads_up_notification_decay",
 				mSettingsHelper.getHeadsUpNotificationDecay());
 	}
