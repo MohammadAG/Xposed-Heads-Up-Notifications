@@ -28,32 +28,11 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
 	private static SettingsHelper mSettingsHelper;
 	private BroadcastReceiver mBroadcastReceiver;
-	private BroadcastReceiver mStatusBarBroadcastReceiver;
 	private int mStatusBarVisibility;
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-		if (lpparam.packageName.equals("android")) {
-			/*
-			* Monitor the status bar's visibility and send a broadcast so that we can know if it's not visible
-			* (fullscreen activity) when displaying Heads Ups.
-			*/
-			Class<?> WindowManagerService = findClass("com.android.server.wm.WindowManagerService",
-					lpparam.classLoader);
-			findAndHookMethod(WindowManagerService, "statusBarVisibilityChanged", int.class,
-					new XC_MethodHook() {
-						@Override
-						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-							int statusBarVisibility = (Integer) getObjectField(param.thisObject,
-									"mLastStatusBarVisibility");
-							Context context = (Context) getObjectField(param.thisObject, "mContext");
-							Intent intent = new Intent("com.mohammadag.headsupenabler.STATUS_BAR_VISIBILITY_UPDATED");
-							intent.putExtra("statusBarVisibility", statusBarVisibility);
-							context.sendBroadcast(intent);
-						}
-					}
-			);
-		} else if (!lpparam.packageName.equals("com.android.systemui")) {
+		if (!lpparam.packageName.equals("com.android.systemui")) {
 			return;
 		}
 
@@ -121,8 +100,18 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		});
 
 		/*
+		* Monitor status bar visibility changes.
+		*/
+		Class<?> PhoneStatusBar = findClass("com.android.systemui.statusbar.phone.PhoneStatusBar", lpparam.classLoader);
+		findAndHookMethod(PhoneStatusBar, "setSystemUiVisibility", int.class, int.class, new XC_MethodHook() {
+			@Override
+			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+				mStatusBarVisibility = (Integer) param.args[0];
+			}
+		});
+
+		/*
 		 * Enable the Heads Up system setting on startup, disable it on module removal.
-		 * Also handle status bar visibility changes.
 		 */
 		findAndHookMethod(BaseStatusBar, "start", new XC_MethodHook() {
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -139,16 +128,8 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						Settings.Global.putInt(context.getContentResolver(), "heads_up_enabled", 0);
 					}
 				};
-				mStatusBarBroadcastReceiver = new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						mStatusBarVisibility = intent.getIntExtra("statusBarVisibility", 0);
-					}
-				};
 
 				mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
-				mContext.registerReceiver(mStatusBarBroadcastReceiver,
-						new IntentFilter("com.mohammadag.headsupenabler.STATUS_BAR_VISIBILITY_UPDATED"));
 				Settings.Global.putInt(mContext.getContentResolver(), "heads_up_enabled", 1);
 			}
 		});
