@@ -78,6 +78,13 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 				}
 		);
 
+		Class<?> NotificationDataEntry = XposedHelpers.findClass("com.android.systemui.statusbar.NotificationData$Entry",
+				lpparam.classLoader);
+		// The current AOSP implementation considers the interruption state (= has it been shown to the user using a
+		// Heads Up?) more important than the notification's score when comparing notifications (to set the order).
+		// This breaks the normal order of notifications, so we're nuking the method that sets the interruption state.
+		XposedHelpers.findAndHookMethod(NotificationDataEntry, "setInterruption", XC_MethodReplacement.DO_NOTHING);
+
 		Class<?> HeadsUpNotificationView = XposedHelpers.findClass("com.android.systemui.statusbar.policy.HeadsUpNotificationView",
 				lpparam.classLoader);
 		XposedHelpers.findAndHookMethod(HeadsUpNotificationView, "onAttachedToWindow", new XC_MethodHook() {
