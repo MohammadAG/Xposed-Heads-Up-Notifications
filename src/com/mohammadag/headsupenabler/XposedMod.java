@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PowerManager;
+import android.app.KeyguardManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -52,12 +53,18 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
+						// mKeyguardManager missing in OmniRom
+						//KeyguardManager keyguardManager = (KeyguardManager) getObjectField(param.thisObject, "mKeyguardManager");
+						Context ctx = (Context) getObjectField(param.thisObject, "mContext");
+						KeyguardManager keyguardManager = (KeyguardManager) ctx.getSystemService(Context.KEYGUARD_SERVICE);
 						// Ignore if the notification is ongoing and we haven't enabled that in the settings
 						return !(n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
 								// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
 								// enabled
 								&& !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
 									&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
+								// Ignore if phone is locked and the "only when unlocked" setting is enabled
+								&& !(keyguardManager.isKeyguardLocked() && mSettingsHelper.isEnabledOnlyWhenUnlocked())
 								// Screen must be on
 								&& powerManager.isScreenOn()
 								// Check if package is blacklisted
