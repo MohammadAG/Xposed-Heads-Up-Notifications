@@ -24,7 +24,6 @@ import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
@@ -52,7 +51,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 					protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
-						
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
 						// Ignore if the notification is ongoing and we haven't enabled that in the settings
 						return !(n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
