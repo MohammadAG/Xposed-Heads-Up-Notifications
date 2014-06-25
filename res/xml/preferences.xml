@@ -20,6 +20,11 @@
         android:summary="@string/pref_fullscreen_summary"
         android:title="@string/pref_fullscreen_title" />
 
+    <CheckBoxPreference
+        android:key="disabled_for_low_priority"
+        android:summary="@string/pref_priority_summary"
+        android:title="@string/pref_priority_title" />
+
     <EditTextPreference
         android:defaultValue="3700"
         android:key="heads_up_notification_decay"

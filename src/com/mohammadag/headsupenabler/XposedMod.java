@@ -8,6 +8,7 @@ import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -60,7 +61,10 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 								// Screen must be on
 								&& powerManager.isScreenOn()
 								// Check if package is blacklisted
-								&& !mSettingsHelper.isListed(n.getPackageName());
+								&& !mSettingsHelper.isListed(n.getPackageName())
+								// Check if low priority  
+								&& !(mSettingsHelper.isDisabledForLowPriority() 
+										&& !(n.getNotification().priority > Notification.PRIORITY_LOW));
 					}
 				}
 		);
@@ -124,7 +128,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						}
 
 						// User is uninstalling us, NOOOOOOOOOOOOOOOOOOO
-						Log.d("Xpsoed", "Cleaning up after Heads Up uninstallation");
+						Log.d("Xposed", "Cleaning up after Heads Up uninstallation");
 						Settings.Global.putInt(context.getContentResolver(), "heads_up_enabled", 0);
 					}
 				};
