@@ -96,4 +96,8 @@ public class SettingsHelper {
 	public boolean shouldRemovePadding() {
 		return mXSharedPreferences.getBoolean("remove_padding", false);
 	}
+
+	public boolean isDisabledForLowPriority() {
+		return mXSharedPreferences.getBoolean("disabled_for_low_priority", false);
+	}
 }
