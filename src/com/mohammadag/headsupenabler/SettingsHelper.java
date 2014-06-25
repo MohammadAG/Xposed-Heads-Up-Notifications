@@ -73,4 +73,8 @@ public class SettingsHelper {
 	public boolean isEnabledOnlyWhenFullscreen() {
 		return mXSharedPreferences.getBoolean("enabled_only_when_fullscreen", false);
 	}
+	
+	public boolean isDisabledForLowPriority(){
+		return mXSharedPreferences.getBoolean("disabled_for_low_priority", false);
+	}
 }

@@ -8,6 +8,7 @@ import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
@@ -50,6 +52,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 					protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
+						
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
 						// Ignore if the notification is ongoing and we haven't enabled that in the settings
 						return !(n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
@@ -60,7 +63,10 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 								// Screen must be on
 								&& powerManager.isScreenOn()
 								// Check if package is blacklisted
-								&& !mSettingsHelper.isListed(n.getPackageName());
+								&& !mSettingsHelper.isListed(n.getPackageName())
+								// Check if low priority  
+								&& !(mSettingsHelper.isDisabledForLowPriority() 
+										&& !(n.getNotification().priority > Notification.PRIORITY_LOW));
 					}
 				}
 		);
@@ -124,7 +130,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						}
 
 						// User is uninstalling us, NOOOOOOOOOOOOOOOOOOO
-						Log.d("Xpsoed", "Cleaning up after Heads Up uninstallation");
+						Log.d("Xposed", "Cleaning up after Heads Up uninstallation");
 						Settings.Global.putInt(context.getContentResolver(), "heads_up_enabled", 0);
 					}
 				};
