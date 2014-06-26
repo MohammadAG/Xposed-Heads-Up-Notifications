@@ -1,23 +1,21 @@
 package com.mohammadag.headsupenabler;
 
+import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.getBooleanField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
 import android.app.Notification;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.PowerManager;
 import android.app.KeyguardManager;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -29,7 +27,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
 	private static SettingsHelper mSettingsHelper;
-	private BroadcastReceiver mBroadcastReceiver;
 	private int mStatusBarVisibility;
 
 	@Override
@@ -122,36 +119,18 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		});
 
 		/*
-		 * Enable the Heads Up system setting on startup, disable it on module removal.
-		 */
-		findAndHookMethod(BaseStatusBar, "start", new XC_MethodHook() {
-			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
-				mBroadcastReceiver = new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-							return;
-						}
-
-						// User is uninstalling us, NOOOOOOOOOOOOOOOOOOO
-						Log.d("Xposed", "Cleaning up after Heads Up uninstallation");
-						Settings.Global.putInt(context.getContentResolver(), "heads_up_enabled", 0);
-					}
-				};
-
-				mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
-				Settings.Global.putInt(mContext.getContentResolver(), "heads_up_enabled", 1);
-			}
-		});
-
-		findAndHookMethod(BaseStatusBar, "destroy", new XC_MethodHook() {
+		* Enable Heads Up on startup.
+		*/
+		findAndHookMethod(PhoneStatusBar, "start", new XC_MethodHook() {
 			@Override
-			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
-				mContext.unregisterReceiver(mBroadcastReceiver);
+			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+				if (!getBooleanField(param.thisObject, "mUseHeadsUp")) {
+					setBooleanField(param.thisObject, "mUseHeadsUp", true);
+					callMethod(param.thisObject, "addHeadsUpView");
+				}
 			}
 		});
+
 	}
 
 	@Override
