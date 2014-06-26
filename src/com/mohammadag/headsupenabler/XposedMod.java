@@ -64,7 +64,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 								&& !(keyguardManager.isKeyguardLocked() && mSettingsHelper.isEnabledOnlyWhenUnlocked())
 								// Screen must be on
 								&& powerManager.isScreenOn()
-								// Check if package is blacklisted
+								// Ignore blacklisted/non whitelisted packages
 								&& !mSettingsHelper.isListed(n.getPackageName())
 								// Check if low priority  
 								&& !(mSettingsHelper.isDisabledForLowPriority() 

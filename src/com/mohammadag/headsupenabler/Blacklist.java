@@ -31,6 +31,10 @@ public class Blacklist extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         mSettingsHelper = new SettingsHelper(this);
         new LoadAppsInfoTask().execute();
+		if (mSettingsHelper.getListType().equals("blacklist"))
+			getActionBar().setTitle(R.string.pref_blacklist_title);
+		else
+			getActionBar().setTitle(R.string.pref_whitelist_title);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 

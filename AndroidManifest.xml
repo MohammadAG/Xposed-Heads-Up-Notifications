@@ -20,8 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.mohammadag.headsupenabler.Blacklist"
-            android:label="@string/pref_blacklist_title" >
+            android:name="com.mohammadag.headsupenabler.Blacklist" >
             <intent-filter>
                 <action android:name="com.mohammadag.headsupenabler.BLACKLIST" />
 
