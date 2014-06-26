@@ -9,11 +9,13 @@ import de.robv.android.xposed.XSharedPreferences;
 public class SettingsHelper {
 	private static final String PACKAGE_NAME = "com.mohammadag.headsupenabler";
 	private static final String PREFS = PACKAGE_NAME + "_preferences";
-	private static final String BLACKLIST = "blacklist";
+	// called "blacklist" for compatibility with previous versions, but can be a whitelist too
+	private static final String NOTIFICATION_FILTER_LIST = "blacklist";
 	private XSharedPreferences mXSharedPreferences = null;
 	private SharedPreferences mSharedPreferences = null;
 	private Context mContext = null;
 	private HashSet<String> mListItems;
+	private String mListType;
 
 	// Called from module's classes.
 	public SettingsHelper() {
@@ -31,19 +33,20 @@ public class SettingsHelper {
 	public void reload() {
 		mXSharedPreferences.reload();
 		mListItems = getListItems();
+		mListType = getListType();
 	}
 
 	public void addListItem(String listItem) {
 		mListItems.add(listItem);
 		SharedPreferences.Editor prefEditor = mSharedPreferences.edit();
-		prefEditor.putStringSet(BLACKLIST, mListItems);
+		prefEditor.putStringSet(NOTIFICATION_FILTER_LIST, mListItems);
 		prefEditor.apply();
 	}
 
 	public void removeListItem(String listItem) {
 		SharedPreferences.Editor prefEditor = mSharedPreferences.edit();
 		mListItems.remove(listItem);
-		prefEditor.putStringSet(BLACKLIST, mListItems);
+		prefEditor.putStringSet(NOTIFICATION_FILTER_LIST, mListItems);
 		prefEditor.apply();
 	}
 
@@ -53,13 +56,25 @@ public class SettingsHelper {
 		return mListItems.contains(s);
 	}
 
+	public boolean shouldIgnore(String s) {
+		return mListType.equals("blacklist") ? isListed(s) : !isListed(s);
+	}
+
 	public HashSet<String> getListItems() {
 		HashSet<String> set = new HashSet<String>();
 		if (mSharedPreferences != null)
-			set.addAll(mSharedPreferences.getStringSet(BLACKLIST, set));
+			set.addAll(mSharedPreferences.getStringSet(NOTIFICATION_FILTER_LIST, set));
 		else if (mXSharedPreferences != null)
-			set.addAll(mXSharedPreferences.getStringSet(BLACKLIST, set));
+			set.addAll(mXSharedPreferences.getStringSet(NOTIFICATION_FILTER_LIST, set));
 		return set;
+	}
+
+	public String getListType() {
+		if (mSharedPreferences != null)
+			return mSharedPreferences.getString("notification_filter_type", "blacklist");
+		else if (mXSharedPreferences != null)
+			return mXSharedPreferences.getString("notification_filter_type", "blacklist");
+		return null;
 	}
 
 	public int getHeadsUpNotificationDecay() {
