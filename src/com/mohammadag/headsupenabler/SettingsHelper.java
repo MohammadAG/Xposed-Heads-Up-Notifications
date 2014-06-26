@@ -94,6 +94,6 @@ public class SettingsHelper {
 	}
 
 	public boolean isEnabledOnlyWhenUnlocked() {
-		return mXSharedPreferences.getBoolean("enabled_only_when_unlocked", false);		
+		return mXSharedPreferences.getBoolean("enabled_only_when_unlocked", false);
 	}
 }
