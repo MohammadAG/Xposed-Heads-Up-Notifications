@@ -17,6 +17,9 @@
     <string name="pref_fullscreen_summary">Enable Heads Up only when in fullscreen apps</string>
     <string name="pref_unlocked_title">Only when unlocked</string>
     <string name="pref_unlocked_summary">Enable Heads Up only when phone is unlocked</string>
+    <string name="pref_remove_padding_title">Remove Heads Up padding</string>
+    <string name="pref_remove_padding_summary">Remove the padding on the sides of the Heads Up notification,
+        and have it show on top of the status bar. A reboot is required to apply this option</string>
     <string name="app_icon_cd">Application icon</string>
 
 </resources>
