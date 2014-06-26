@@ -13,20 +13,26 @@ import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPacka
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.res.XModuleResources;
+import android.graphics.PixelFormat;
 import android.os.PowerManager;
 import android.app.KeyguardManager;
 import android.service.notification.StatusBarNotification;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
+public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
 	private static SettingsHelper mSettingsHelper;
+	private static String MODULE_PATH;
 	private int mStatusBarVisibility;
 
 	@Override
@@ -119,6 +125,45 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		});
 
 		/*
+		* Make the Heads Up notification show on top of the status bar by setting the y position to 0.
+		* It could allow for other changes (e.g. change the gravity) in the future as well.
+		*/
+		findAndHookMethod(PhoneStatusBar, "addHeadsUpView", new XC_MethodReplacement() {
+			@Override
+			protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+				Context context = (Context) getObjectField(param.thisObject, "mContext");
+				WindowManager windowManager = (WindowManager) getObjectField(param.thisObject, "mWindowManager");
+				View headsUpNotificationView = (View) getObjectField(param.thisObject, "mHeadsUpNotificationView");
+				int animation = context.getResources().getIdentifier("Animation_StatusBar_HeadsUp", "style",
+						"com.android.systemui");
+
+				WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+						WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,
+						WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, // above the status bar!
+						WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+								| WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+								| WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+								| WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+								| WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+								| WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+						PixelFormat.TRANSLUCENT
+				);
+				lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+				lp.gravity = Gravity.TOP;
+				if (mSettingsHelper.shouldRemovePadding())
+					lp.y = 0;
+				else
+					lp.y = (Integer) callMethod(param.thisObject, "getStatusBarHeight");
+				lp.setTitle("Heads Up");
+				lp.packageName = context.getPackageName();
+				lp.windowAnimations = animation;
+
+				windowManager.addView(headsUpNotificationView, lp);
+				return null;
+			}
+		});
+
+		/*
 		* Enable Heads Up on startup.
 		*/
 		findAndHookMethod(PhoneStatusBar, "start", new XC_MethodHook() {
@@ -134,6 +179,11 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 	}
 
 	@Override
+	public void initZygote(StartupParam startupParam) throws Throwable {
+		MODULE_PATH = startupParam.modulePath;
+	}
+
+	@Override
 	public void handleInitPackageResources(InitPackageResourcesParam resparam) throws Throwable {
 		if (!resparam.packageName.equals("com.android.systemui"))
 			return;
@@ -142,8 +192,17 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			mSettingsHelper = new SettingsHelper();
 		}
 
+
 		// Set the delay before the Heads Up notification is hidden.
 		resparam.res.setReplacement("com.android.systemui", "integer", "heads_up_notification_decay",
 				mSettingsHelper.getHeadsUpNotificationDecay());
+
+		// Replace the Heads Up notification's background to remove the padding.
+		if (mSettingsHelper.shouldRemovePadding()) {
+			XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, resparam.res);
+			resparam.res.setReplacement("com.android.systemui", "drawable", "heads_up_window_bg",
+					modRes.fwd(R.drawable.heads_up_window_bg));
+		}
 	}
+
 }

@@ -96,4 +96,8 @@ public class SettingsHelper {
 	public boolean isEnabledOnlyWhenUnlocked() {
 		return mXSharedPreferences.getBoolean("enabled_only_when_unlocked", false);
 	}
+
+	public boolean shouldRemovePadding() {
+		return mXSharedPreferences.getBoolean("remove_padding", false);
+	}
 }

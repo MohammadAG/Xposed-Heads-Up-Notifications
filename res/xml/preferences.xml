@@ -30,6 +30,11 @@
         android:summary="@string/pref_unlocked_summary"
         android:title="@string/pref_unlocked_title" />
 
+    <CheckBoxPreference
+        android:key="remove_padding"
+        android:summary="@string/pref_remove_padding_summary"
+        android:title="@string/pref_remove_padding_title" />
+
     <EditTextPreference
         android:defaultValue="3700"
         android:key="heads_up_notification_decay"
