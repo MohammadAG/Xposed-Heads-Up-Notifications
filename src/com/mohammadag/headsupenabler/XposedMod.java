@@ -1,34 +1,40 @@
 package com.mohammadag.headsupenabler;
 
+import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.getBooleanField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
+import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
+
 
 import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.res.XModuleResources;
+import android.graphics.PixelFormat;
 import android.os.PowerManager;
-import android.provider.Settings;
+import android.app.KeyguardManager;
 import android.service.notification.StatusBarNotification;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources {
+public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
 	private static SettingsHelper mSettingsHelper;
-	private BroadcastReceiver mBroadcastReceiver;
+	private static String MODULE_PATH;
 	private int mStatusBarVisibility;
 
 	@Override
@@ -52,19 +58,25 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						StatusBarNotification n = (StatusBarNotification) param.args[0];
 						mSettingsHelper.reload();
 						PowerManager powerManager = (PowerManager) getObjectField(param.thisObject, "mPowerManager");
+						// mKeyguardManager missing in OmniRom
+						//KeyguardManager keyguardManager = (KeyguardManager) getObjectField(param.thisObject, "mKeyguardManager");
+						Context ctx = (Context) getObjectField(param.thisObject, "mContext");
+						KeyguardManager keyguardManager = (KeyguardManager) ctx.getSystemService(Context.KEYGUARD_SERVICE);
 						// Ignore if the notification is ongoing and we haven't enabled that in the settings
 						return !(n.isOngoing() && !mSettingsHelper.isEnabledForOngoingNotifications())
 								// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
 								// enabled
 								&& !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
 									&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
+								// Ignore if phone is locked and the "only when unlocked" setting is enabled
+								&& !(keyguardManager.isKeyguardLocked() && mSettingsHelper.isEnabledOnlyWhenUnlocked())
 								// Screen must be on
 								&& powerManager.isScreenOn()
-								// Check if package is blacklisted
-								&& !mSettingsHelper.isListed(n.getPackageName())
 								// Check if low priority  
 								&& !(mSettingsHelper.isDisabledForLowPriority() 
-										&& !(n.getNotification().priority > Notification.PRIORITY_LOW));
+										&& !(n.getNotification().priority > Notification.PRIORITY_LOW))
+								// Ignore blacklisted/non whitelisted packages
+								&& !mSettingsHelper.shouldIgnore(n.getPackageName());
 					}
 				}
 		);
@@ -115,36 +127,62 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		});
 
 		/*
-		 * Enable the Heads Up system setting on startup, disable it on module removal.
-		 */
-		findAndHookMethod(BaseStatusBar, "start", new XC_MethodHook() {
-			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
-				mBroadcastReceiver = new BroadcastReceiver() {
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-							return;
-						}
-
-						// User is uninstalling us, NOOOOOOOOOOOOOOOOOOO
-						Log.d("Xposed", "Cleaning up after Heads Up uninstallation");
-						Settings.Global.putInt(context.getContentResolver(), "heads_up_enabled", 0);
-					}
-				};
-
-				mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_PACKAGE_REMOVED));
-				Settings.Global.putInt(mContext.getContentResolver(), "heads_up_enabled", 1);
-			}
-		});
-
-		findAndHookMethod(BaseStatusBar, "destroy", new XC_MethodHook() {
+		* Make the Heads Up notification show on top of the status bar by setting the y position to 0.
+		* It could allow for other changes (e.g. change the gravity) in the future as well.
+		*/
+		findAndHookMethod(PhoneStatusBar, "addHeadsUpView", new XC_MethodReplacement() {
 			@Override
-			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-				Context mContext = (Context) getObjectField(param.thisObject, "mContext");
-				mContext.unregisterReceiver(mBroadcastReceiver);
+			protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+				Context context = (Context) getObjectField(param.thisObject, "mContext");
+				WindowManager windowManager = (WindowManager) getObjectField(param.thisObject, "mWindowManager");
+				View headsUpNotificationView = (View) getObjectField(param.thisObject, "mHeadsUpNotificationView");
+				int animation = context.getResources().getIdentifier("Animation_StatusBar_HeadsUp", "style",
+						"com.android.systemui");
+
+				WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+						WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,
+						WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, // above the status bar!
+						WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+								| WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+								| WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+								| WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+								| WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+								| WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+						PixelFormat.TRANSLUCENT
+				);
+				lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+				lp.gravity = Gravity.TOP;
+				if (mSettingsHelper.shouldRemovePadding())
+					lp.y = 0;
+				else
+					lp.y = (Integer) callMethod(param.thisObject, "getStatusBarHeight");
+				lp.setTitle("Heads Up");
+				lp.packageName = context.getPackageName();
+				lp.windowAnimations = animation;
+
+				windowManager.addView(headsUpNotificationView, lp);
+				return null;
 			}
 		});
+
+		/*
+		* Enable Heads Up on startup.
+		*/
+		findAndHookMethod(PhoneStatusBar, "start", new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+				if (!getBooleanField(param.thisObject, "mUseHeadsUp")) {
+					setBooleanField(param.thisObject, "mUseHeadsUp", true);
+					callMethod(param.thisObject, "addHeadsUpView");
+				}
+			}
+		});
+
+	}
+
+	@Override
+	public void initZygote(StartupParam startupParam) throws Throwable {
+		MODULE_PATH = startupParam.modulePath;
 	}
 
 	@Override
@@ -156,8 +194,17 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			mSettingsHelper = new SettingsHelper();
 		}
 
+
 		// Set the delay before the Heads Up notification is hidden.
 		resparam.res.setReplacement("com.android.systemui", "integer", "heads_up_notification_decay",
 				mSettingsHelper.getHeadsUpNotificationDecay());
+
+		// Replace the Heads Up notification's background to remove the padding.
+		if (mSettingsHelper.shouldRemovePadding()) {
+			XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, resparam.res);
+			resparam.res.setReplacement("com.android.systemui", "drawable", "heads_up_window_bg",
+					modRes.fwd(R.drawable.heads_up_window_bg));
+		}
 	}
+
 }

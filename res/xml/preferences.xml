@@ -24,6 +24,16 @@
         android:key="disabled_for_low_priority"
         android:summary="@string/pref_priority_summary"
         android:title="@string/pref_priority_title" />
+    
+	<CheckBoxPreference
+        android:key="enabled_only_when_unlocked"
+        android:summary="@string/pref_unlocked_summary"
+        android:title="@string/pref_unlocked_title" />
+
+    <CheckBoxPreference
+        android:key="remove_padding"
+        android:summary="@string/pref_remove_padding_summary"
+        android:title="@string/pref_remove_padding_title" />
 
     <EditTextPreference
         android:defaultValue="3700"
@@ -32,9 +42,15 @@
         android:summary="@string/heads_up_notification_decay_summary"
         android:title="@string/heads_up_notification_decay_title" />
 
+    <ListPreference
+        android:key="notification_filter_type"
+        android:title="@string/pref_filter_type_title"
+        android:defaultValue="blacklist"
+        android:entries="@array/list_type_entries"
+        android:entryValues="@array/list_type_values" />
+
     <Preference
-        android:summary="@string/blacklist_summary"
-        android:title="@string/blacklist_title" >
+        android:key="notification_list">
         <intent android:action="com.mohammadag.headsupenabler.BLACKLIST" />
     </Preference>
 
