@@ -21,6 +21,11 @@
         android:title="@string/pref_fullscreen_title" />
 
     <CheckBoxPreference
+        android:key="disabled_for_low_priority"
+        android:summary="@string/pref_priority_summary"
+        android:title="@string/pref_priority_title" />
+    
+	<CheckBoxPreference
         android:key="enabled_only_when_unlocked"
         android:summary="@string/pref_unlocked_summary"
         android:title="@string/pref_unlocked_title" />

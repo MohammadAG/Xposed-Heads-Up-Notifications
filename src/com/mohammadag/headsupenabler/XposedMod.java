@@ -11,6 +11,9 @@ import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
+
+import android.app.Notification;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.res.XModuleResources;
 import android.graphics.PixelFormat;
@@ -69,6 +72,9 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 								&& !(keyguardManager.isKeyguardLocked() && mSettingsHelper.isEnabledOnlyWhenUnlocked())
 								// Screen must be on
 								&& powerManager.isScreenOn()
+								// Check if low priority  
+								&& !(mSettingsHelper.isDisabledForLowPriority() 
+										&& !(n.getNotification().priority > Notification.PRIORITY_LOW))
 								// Ignore blacklisted/non whitelisted packages
 								&& !mSettingsHelper.shouldIgnore(n.getPackageName());
 					}
