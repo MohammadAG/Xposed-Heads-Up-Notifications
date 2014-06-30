@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.Gravity;
 import de.robv.android.xposed.XSharedPreferences;
 
 public class SettingsHelper {
@@ -16,6 +17,8 @@ public class SettingsHelper {
 	private Context mContext = null;
 	private HashSet<String> mListItems;
 	private String mListType;
+    private static final String GRAVITY_TOP = "gravityTop";
+    private static final String GRAVITY_BOTTOM = "gravityBottom";
 
 	// Called from module's classes.
 	public SettingsHelper() {
@@ -99,5 +102,19 @@ public class SettingsHelper {
 
 	public boolean isDisabledForLowPriority() {
 		return mXSharedPreferences.getBoolean("disabled_for_low_priority", false);
+	}
+	
+	public int getGravity() {
+		String gravitySettingValue = mXSharedPreferences.getString("heads_up_gravity", null);
+		if (gravitySettingValue == null) {
+			return Gravity.TOP; // default
+		}
+		if (gravitySettingValue.equals(GRAVITY_TOP)) {
+			return Gravity.TOP;
+		} else if (gravitySettingValue.equals(GRAVITY_BOTTOM)) {
+			return Gravity.BOTTOM;
+		} else { // unknown setting value
+			return Gravity.TOP;
+		}
 	}
 }

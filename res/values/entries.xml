@@ -8,4 +8,12 @@
         <item>blacklist</item>
         <item>whitelist</item>
     </string-array>
+    <string-array name="gravity_type_entries">
+        <item>@string/pref_gravity_top_title</item>
+        <item>@string/pref_gravity_bottom_title</item>
+    </string-array>
+    <string-array name="gravity_type_values">
+        <item>gravityTop</item>
+        <item>gravityBottom</item>
+    </string-array>
 </resources>

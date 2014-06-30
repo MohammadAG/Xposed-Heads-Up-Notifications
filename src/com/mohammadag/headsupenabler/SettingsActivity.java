@@ -41,5 +41,24 @@ public class SettingsActivity extends PreferenceActivity {
 				return true;
 			}
 		});
+
+		final ListPreference notificationGravityTypePreference = (ListPreference) findPreference("heads_up_gravity");
+		if (notificationGravityTypePreference.getValue().equals("gravityTop")) {
+			notificationGravityTypePreference.setSummary(R.string.pref_gravity_top_title);
+		} else {
+			notificationGravityTypePreference.setSummary(R.string.pref_gravity_bottom_title);
+		}
+
+		notificationGravityTypePreference.setOnPreferenceChangeListener(new ListPreference.OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				if (newValue.equals("gravityTop")) {
+					notificationGravityTypePreference.setSummary(R.string.pref_gravity_top_title);
+				} else {
+					notificationGravityTypePreference.setSummary(R.string.pref_gravity_bottom_title);
+				}
+				return true;
+			}
+		});
 	}
 }

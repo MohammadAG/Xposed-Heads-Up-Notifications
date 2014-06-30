@@ -18,7 +18,6 @@ import android.graphics.PixelFormat;
 import android.os.PowerManager;
 import android.app.KeyguardManager;
 import android.service.notification.StatusBarNotification;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -149,7 +148,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 						PixelFormat.TRANSLUCENT
 				);
 				lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-				lp.gravity = Gravity.TOP;
+				lp.gravity = mSettingsHelper.getGravity();
 				if (mSettingsHelper.shouldRemovePadding())
 					lp.y = 0;
 				else
