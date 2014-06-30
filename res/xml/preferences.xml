@@ -29,6 +29,8 @@
         android:key="remove_padding"
         android:summary="@string/pref_remove_padding_summary"
         android:title="@string/pref_remove_padding_title" />
+
+    <CheckBoxPreference
         android:key="disabled_for_low_priority"
         android:summary="@string/pref_priority_summary"
         android:title="@string/pref_priority_title" />
