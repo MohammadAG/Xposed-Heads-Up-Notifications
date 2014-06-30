@@ -101,9 +101,13 @@ public class SettingsHelper {
 	public boolean isDisabledForLowPriority() {
 		return mXSharedPreferences.getBoolean("disabled_for_low_priority", false);
 	}
-	
+
 	public int getGravity() {
 		String gravitySettingValue = mXSharedPreferences.getString("heads_up_gravity", Integer.toString(Gravity.TOP));
 		return Integer.parseInt(gravitySettingValue);
+	}
+
+	public boolean isHaloEnabled() {
+		return mXSharedPreferences.getBoolean("halo_enabled", false);
 	}
 }

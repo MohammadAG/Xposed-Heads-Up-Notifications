@@ -22,6 +22,8 @@
         and have it show on top of the status bar (a reboot is required to apply this option)</string>
     <string name="pref_priority_title">Hide low priority notifications</string>
     <string name="pref_priority_summary">Hide notifications with low and minimum priority</string>
+    <string name="pref_halo_title">Open in Halo</string>
+    <string name="pref_halo_summary">For ROMs with Halo compatibility</string>
     <string name="app_icon_cd">Application icon</string>
     <string name="pref_gravity_title">Notification gravity</string>
     <string name="pref_gravity_top_title">Top</string>
