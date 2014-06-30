@@ -41,6 +41,13 @@
         android:title="@string/heads_up_notification_decay_title" />
 
     <ListPreference
+        android:key="heads_up_gravity"
+        android:title="@string/pref_gravity_title"
+        android:defaultValue="gravityTop"
+        android:entries="@array/gravity_type_entries"
+        android:entryValues="@array/gravity_type_values" />
+
+    <ListPreference
         android:key="notification_filter_type"
         android:title="@string/pref_filter_type_title"
         android:defaultValue="blacklist"

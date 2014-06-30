@@ -23,5 +23,8 @@
     <string name="pref_priority_title">Hide low priority notifications</string>
     <string name="pref_priority_summary">Hide notifications with low and minimum priority</string>
     <string name="app_icon_cd">Application icon</string>
+    <string name="pref_gravity_title">Notification gravity</string>
+    <string name="pref_gravity_top_title">Top</string>
+    <string name="pref_gravity_bottom_title">Bottom</string>
 
 </resources>
