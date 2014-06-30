@@ -17,8 +17,6 @@ public class SettingsHelper {
 	private Context mContext = null;
 	private HashSet<String> mListItems;
 	private String mListType;
-    private static final String GRAVITY_TOP = "gravityTop";
-    private static final String GRAVITY_BOTTOM = "gravityBottom";
 
 	// Called from module's classes.
 	public SettingsHelper() {
@@ -105,16 +103,7 @@ public class SettingsHelper {
 	}
 	
 	public int getGravity() {
-		String gravitySettingValue = mXSharedPreferences.getString("heads_up_gravity", null);
-		if (gravitySettingValue == null) {
-			return Gravity.TOP; // default
-		}
-		if (gravitySettingValue.equals(GRAVITY_TOP)) {
-			return Gravity.TOP;
-		} else if (gravitySettingValue.equals(GRAVITY_BOTTOM)) {
-			return Gravity.BOTTOM;
-		} else { // unknown setting value
-			return Gravity.TOP;
-		}
+		String gravitySettingValue = mXSharedPreferences.getString("heads_up_gravity", Integer.toString(Gravity.TOP));
+		return Integer.parseInt(gravitySettingValue);
 	}
 }

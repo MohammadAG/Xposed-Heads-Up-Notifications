@@ -6,6 +6,8 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 
 public class SettingsActivity extends PreferenceActivity {
+	private static final String GRAVITY_TOP = "48";
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +45,7 @@ public class SettingsActivity extends PreferenceActivity {
 		});
 
 		final ListPreference notificationGravityTypePreference = (ListPreference) findPreference("heads_up_gravity");
-		if (notificationGravityTypePreference.getValue().equals("gravityTop")) {
+		if (notificationGravityTypePreference.getValue().equals(GRAVITY_TOP)) {
 			notificationGravityTypePreference.setSummary(R.string.pref_gravity_top_title);
 		} else {
 			notificationGravityTypePreference.setSummary(R.string.pref_gravity_bottom_title);
@@ -52,7 +54,7 @@ public class SettingsActivity extends PreferenceActivity {
 		notificationGravityTypePreference.setOnPreferenceChangeListener(new ListPreference.OnPreferenceChangeListener() {
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue) {
-				if (newValue.equals("gravityTop")) {
+				if (newValue.equals(GRAVITY_TOP)) {
 					notificationGravityTypePreference.setSummary(R.string.pref_gravity_top_title);
 				} else {
 					notificationGravityTypePreference.setSummary(R.string.pref_gravity_bottom_title);

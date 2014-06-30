@@ -45,7 +45,7 @@
     <ListPreference
         android:key="heads_up_gravity"
         android:title="@string/pref_gravity_title"
-        android:defaultValue="gravityTop"
+        android:defaultValue="48"
         android:entries="@array/gravity_type_entries"
         android:entryValues="@array/gravity_type_values" />
 
