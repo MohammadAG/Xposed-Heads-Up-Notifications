@@ -19,12 +19,13 @@
     <string name="pref_unlocked_summary">Enable Heads Up only when phone is unlocked</string>
     <string name="pref_remove_padding_title">Remove Heads Up padding</string>
     <string name="pref_remove_padding_summary">Remove the padding on the sides of the Heads Up notification,
-        and have it show on top of the status bar. A reboot is required to apply this option</string>
+        and have it show on top of the status bar (a reboot is required to apply this option)</string>
     <string name="pref_priority_title">Hide low priority notifications</string>
     <string name="pref_priority_summary">Hide notifications with low and minimum priority</string>
     <string name="app_icon_cd">Application icon</string>
     <string name="pref_gravity_title">Notification gravity</string>
     <string name="pref_gravity_top_title">Top</string>
     <string name="pref_gravity_bottom_title">Bottom</string>
+    <string name="reboot_required">%1$s (a reboot is required to apply this option)</string>
 
 </resources>

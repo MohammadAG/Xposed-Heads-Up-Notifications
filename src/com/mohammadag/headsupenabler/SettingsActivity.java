@@ -46,18 +46,22 @@ public class SettingsActivity extends PreferenceActivity {
 
 		final ListPreference notificationGravityTypePreference = (ListPreference) findPreference("heads_up_gravity");
 		if (notificationGravityTypePreference.getValue().equals(GRAVITY_TOP)) {
-			notificationGravityTypePreference.setSummary(R.string.pref_gravity_top_title);
+			notificationGravityTypePreference.setSummary(getString(R.string.reboot_required,
+					getString(R.string.pref_gravity_top_title)));
 		} else {
-			notificationGravityTypePreference.setSummary(R.string.pref_gravity_bottom_title);
+			notificationGravityTypePreference.setSummary(getString(R.string.reboot_required,
+					getString(R.string.pref_gravity_bottom_title)));
 		}
 
 		notificationGravityTypePreference.setOnPreferenceChangeListener(new ListPreference.OnPreferenceChangeListener() {
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue) {
 				if (newValue.equals(GRAVITY_TOP)) {
-					notificationGravityTypePreference.setSummary(R.string.pref_gravity_top_title);
+					notificationGravityTypePreference.setSummary(getString(R.string.reboot_required,
+							getString(R.string.pref_gravity_top_title)));
 				} else {
-					notificationGravityTypePreference.setSummary(R.string.pref_gravity_bottom_title);
+					notificationGravityTypePreference.setSummary(getString(R.string.reboot_required,
+							getString(R.string.pref_gravity_bottom_title)));
 				}
 				return true;
 			}
