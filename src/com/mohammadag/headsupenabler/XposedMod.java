@@ -12,7 +12,9 @@ import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.XModuleResources;
 import android.graphics.PixelFormat;
 import android.os.PowerManager;
@@ -21,6 +23,7 @@ import android.service.notification.StatusBarNotification;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
@@ -160,6 +163,42 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 
 				windowManager.addView(headsUpNotificationView, lp);
 				return null;
+			}
+		});
+
+
+		/*
+		* Halo
+		*/
+		findAndHookMethod(BaseStatusBar, "inflateViews", NotificationDataEntry, ViewGroup.class, new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+				mSettingsHelper.reload();
+				if (!mSettingsHelper.isHaloEnabled())
+					return;
+				ViewGroup parent = (ViewGroup) param.args[1];
+				if (!parent.getClass().getName().equals("android.widget.FrameLayout"))
+					return;
+				Object entry = param.args[0];
+				final Context context = (Context) getObjectField(param.thisObject, "mContext");
+				View row = (View) getObjectField(entry, "row");
+				View content = row.findViewById(context.getResources().getIdentifier("content", "id",
+						"com.android.systemui"));
+				Object sbn = getObjectField(entry, "notification");
+				Notification notification = (Notification) getObjectField(sbn, "notification");
+				final PendingIntent contentIntent = notification.contentIntent;
+				content.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						if (contentIntent == null)
+							return;
+						Intent intent = new Intent().addFlags(0x00002000);
+						try {
+							contentIntent.send(context, 0, intent);
+						} catch (PendingIntent.CanceledException ignored) {
+						}
+					}
+				});
 			}
 		});
 

@@ -35,6 +35,11 @@
         android:summary="@string/pref_priority_summary"
         android:title="@string/pref_priority_title" />
 
+    <CheckBoxPreference
+        android:key="halo_enabled"
+        android:summary="@string/pref_halo_summary"
+        android:title="@string/pref_halo_title" />
+
     <EditTextPreference
         android:defaultValue="3700"
         android:key="heads_up_notification_decay"

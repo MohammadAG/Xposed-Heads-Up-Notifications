@@ -100,4 +100,8 @@ public class SettingsHelper {
 	public boolean isDisabledForLowPriority() {
 		return mXSharedPreferences.getBoolean("disabled_for_low_priority", false);
 	}
+
+	public boolean isHaloEnabled() {
+		return mXSharedPreferences.getBoolean("halo_enabled", false);
+	}
 }
