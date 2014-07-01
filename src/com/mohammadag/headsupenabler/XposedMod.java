@@ -3,39 +3,45 @@ package com.mohammadag.headsupenabler;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
+import static de.robv.android.xposed.XposedHelpers.findConstructorExact;
 import static de.robv.android.xposed.XposedHelpers.getAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.getBooleanField;
+import static de.robv.android.xposed.XposedHelpers.getLongField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.setAdditionalInstanceField;
 import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
-import static de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 
+import java.lang.reflect.Constructor;
+
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.content.res.XModuleResources;
 import android.graphics.PixelFormat;
 import android.os.PowerManager;
-import android.app.KeyguardManager;
 import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResourcesParam;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
 	private static SettingsHelper mSettingsHelper;
 	private static String MODULE_PATH;
 	private int mStatusBarVisibility;
+	protected Object mHtcExpandHelper;
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
@@ -50,7 +56,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		/*
 		* Determine when to show a Heads Up notification.
 		*/
-		Class<?> BaseStatusBar = findClass("com.android.systemui.statusbar.BaseStatusBar", lpparam.classLoader);
+		final Class<?> BaseStatusBar = findClass("com.android.systemui.statusbar.BaseStatusBar", lpparam.classLoader);
 		findAndHookMethod(BaseStatusBar, "shouldInterrupt", StatusBarNotification.class,
 				new XC_MethodReplacement() {
 					@Override
@@ -94,16 +100,76 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		/*
 		 * Enable one handed expansion for the Heads Up view.
 		 */
-		Class<?> HeadsUpNotificationView = findClass("com.android.systemui.statusbar.policy.HeadsUpNotificationView",
+		final Class<?> HeadsUpNotificationView = findClass("com.android.systemui.statusbar.policy.HeadsUpNotificationView",
 				lpparam.classLoader);
+		final Class<?> ExpandHelper = findClass("com.android.systemui.ExpandHelper", lpparam.classLoader);
+		final Class<?> ExpandHelperCallback = findClass("com.android.systemui.ExpandHelper$Callback", lpparam.classLoader);
 		findAndHookMethod(HeadsUpNotificationView, "onAttachedToWindow", new XC_MethodHook() {
+			private Unhook mHtcUnhook;
+
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-				setAdditionalInstanceField(getObjectField(param.thisObject, "mExpandHelper"), "headsUp", true);
+				Object expandHelper = null;
+				try {
+					 expandHelper = getObjectField(param.thisObject, "mExpandHelper");
+				} catch (NoSuchFieldError e) {
+				}
+				if (android.os.Build.MANUFACTURER.equalsIgnoreCase("htc")
+						&& expandHelper == null) {
+					Context mContext = (Context) getObjectField(param.thisObject, "mContext");
+					Resources res = mContext.getResources();
+					int minHeight = res.getDimensionPixelSize(
+							res.getIdentifier("notification_row_min_height",
+									"dimen", "com.android.systemui"));
+					int maxHeight = res.getDimensionPixelSize(
+							res.getIdentifier("notification_row_max_height",
+									"dimen", "com.android.systemui"));
+					Constructor<?> constructor = findConstructorExact(ExpandHelper, Context.class,
+							ExpandHelperCallback, int.class, int.class, BaseStatusBar);
+					expandHelper = constructor.newInstance(mContext, param.thisObject, minHeight,
+							maxHeight, null);
+
+					mHtcExpandHelper = expandHelper;
+
+					if (mHtcUnhook == null) {
+						mHtcUnhook = findAndHookMethod(HeadsUpNotificationView,
+								"onInterceptTouchEvent", MotionEvent.class, new XC_MethodReplacement() {
+							protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+								long mStartTouchTime = getLongField(param.thisObject, "mStartTouchTime");
+								if (System.currentTimeMillis() < mStartTouchTime) {
+									return true;
+								}
+
+								boolean result = (Boolean) XposedBridge.invokeOriginalMethod(param.method,
+										param.thisObject, param.args);
+								return result || (Boolean) callMethod(mHtcExpandHelper,
+										"onInterceptTouchEvent", param.args[0]);
+							}
+						});
+
+						findAndHookMethod(HeadsUpNotificationView,
+								"onTouchEvent", MotionEvent.class, new XC_MethodReplacement() {
+							protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+								long mStartTouchTime = getLongField(param.thisObject, "mStartTouchTime");
+								if (System.currentTimeMillis() < mStartTouchTime) {
+									return false;
+								}
+
+								callMethod(getObjectField(param.thisObject, "mBar"), "resetHeadsUpDecayTimer");
+								boolean result = (Boolean) XposedBridge.invokeOriginalMethod(param.method,
+										param.thisObject, param.args);
+
+								return result || (Boolean) callMethod(mHtcExpandHelper,
+										"onTouchEvent", param.args[0]);
+							}
+						});
+					}
+				}
+
+				setAdditionalInstanceField(expandHelper, "headsUp", true);
 			}
 		});
 
-		Class<?> ExpandHelper = findClass("com.android.systemui.ExpandHelper", lpparam.classLoader);
 		findAndHookMethod(ExpandHelper, "onInterceptTouchEvent", MotionEvent.class, new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
