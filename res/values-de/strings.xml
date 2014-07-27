@@ -1,0 +1,33 @@
+<resources>
+
+    <string name="app_name">Heads Up Notifications</string>
+    <string name="copyright_summary">Copyright © 2014 – MohammadAG / GermainZ\nVisit support thread</string>
+    <string name="loading">Lade...</string>
+    <string name="heads_up_notification_decay_title">Verzögerung der Benachrichtigung</string>
+    <string name="heads_up_notification_decay_summary">Zeit (in ms) bevor die Heads Up Benachrichtigung
+        verschwindet. Ein Neustart ist zum Aktivieren dieser Funktion erforderlich</string>
+    <string name="pref_filter_type_title">Benachrichtigungs Filter</string>
+    <string name="pref_blacklist_title">Blacklist</string>
+    <string name="pref_blacklist_summary">Benachrichtigungen bestimmter Apps ignorieren</string>
+    <string name="pref_whitelist_title">Whitelist</string>
+    <string name="pref_whitelist_summary">Nur die Benachrichtigungen bestimmter Apps anzeigen</string>
+    <string name="pref_ongoing_title">Dauerhafte Benachrichtigungen</string>
+    <string name="pref_ongoing_summary">Heads Up für dauerhafte Benachrichtigungen aktivieren</string>
+    <string name="pref_fullscreen_title">Nur im Vollbild Modus</string>
+    <string name="pref_fullscreen_summary">Heads Up nur in Vollbild Apps anzeigen</string>
+    <string name="pref_unlocked_title">Nur entsperrt</string>
+    <string name="pref_unlocked_summary">Heads Up nur anzeigen, wenn das Telefon entsperrt ist</string>
+    <string name="pref_remove_padding_title">Heads Up padding entfernen</string>
+    <string name="pref_remove_padding_summary">Das padding an den Seiten der Heads Up Benachrichtigungen entfernen,
+        und Heads Up über der Status Bar einblenden (ein Neustart ist zum Aktivieren dieser Funktion erforderlich)</string>
+    <string name="pref_priority_title">Benachrichtigungen mit niedriger Priorität verbergen</string>
+    <string name="pref_priority_summary">Benachrichtigungen mit "low" und "minimum" Priorität verbergen</string>
+    <string name="pref_halo_title">In Halo öffnen</string>
+    <string name="pref_halo_summary">Für ROMs mit Halo Kompatibilität</string>
+    <string name="app_icon_cd">App Symbol</string>
+    <string name="pref_gravity_title">Position der Benachrichtigung</string>
+    <string name="pref_gravity_top_title">Oben</string>
+    <string name="pref_gravity_bottom_title">Unten</string>
+    <string name="reboot_required">%1$s (ein Neustart ist zum Aktivieren dieser Funktion erforderlich)</string>
+
+</resources>
