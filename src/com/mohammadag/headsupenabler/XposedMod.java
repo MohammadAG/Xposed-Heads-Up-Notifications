@@ -202,7 +202,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 				Context context = (Context) getObjectField(param.thisObject, "mContext");
 				WindowManager windowManager = (WindowManager) getObjectField(param.thisObject, "mWindowManager");
 				View headsUpNotificationView = (View) getObjectField(param.thisObject, "mHeadsUpNotificationView");
-				int animation = context.getResources().getIdentifier("Animation_StatusBar_HeadsUp", "style",
+				int animation = context.getResources().getIdentifier("Animation.StatusBar.HeadsUp", "style",
 						"com.android.systemui");
 
 				WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
