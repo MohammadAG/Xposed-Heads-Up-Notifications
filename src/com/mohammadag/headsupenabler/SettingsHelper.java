@@ -94,6 +94,10 @@ public class SettingsHelper {
 		return mXSharedPreferences.getBoolean("enabled_only_when_unlocked", false);
 	}
 
+    public boolean isAlwaysExpanded() {
+        return mXSharedPreferences.getBoolean("always_expanded", false);
+    }
+
 	public boolean shouldRemovePadding() {
 		return mXSharedPreferences.getBoolean("remove_padding", false);
 	}

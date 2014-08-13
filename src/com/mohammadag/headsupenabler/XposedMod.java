@@ -28,6 +28,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -194,7 +196,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 
 		/*
 		* Make the Heads Up notification show on top of the status bar by setting the y position to 0.
-		* It could allow for other changes (e.g. change the gravity) in the future as well.
 		*/
 		findAndHookMethod(PhoneStatusBar, "addHeadsUpView", new XC_MethodReplacement() {
 			@Override
@@ -231,6 +232,17 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			}
 		});
 
+        /*
+        * Always expanded
+        */
+        findAndHookMethod(HeadsUpNotificationView, "setNotification", NotificationDataEntry, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                Object headsUp = getObjectField(param.thisObject, "mHeadsUp");
+                FrameLayout row = (FrameLayout) getObjectField(headsUp, "row");
+                callMethod(row, "setExpanded", mSettingsHelper.isAlwaysExpanded());
+            }
+        });
 
 		/*
 		* Halo

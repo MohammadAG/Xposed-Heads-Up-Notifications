@@ -26,6 +26,11 @@
         android:title="@string/pref_unlocked_title" />
 
     <CheckBoxPreference
+        android:key="always_expanded"
+        android:summary="@string/pref_always_expanded_summary"
+        android:title="@string/pref_always_expanded_title" />
+
+    <CheckBoxPreference
         android:key="remove_padding"
         android:summary="@string/pref_remove_padding_summary"
         android:title="@string/pref_remove_padding_title" />
