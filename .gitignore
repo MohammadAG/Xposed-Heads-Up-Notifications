@@ -1,6 +1,9 @@
 .idea/
+.gradle/
 bin/
 gen/
 out/
+build/
 *.apk
 *.iml
+local.properties
