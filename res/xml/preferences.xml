@@ -36,6 +36,20 @@
         android:title="@string/pref_remove_padding_title" />
 
     <CheckBoxPreference
+        android:key="custom_colors_enabled"
+        android:title="@string/pref_custom_colors_enabled_title" />
+
+    <Preference
+        android:key="background_color"
+        android:title="@string/pref_background_color_title"
+        android:dependency="custom_colors_enabled" />
+
+    <Preference
+        android:key="foreground_color"
+        android:title="@string/pref_foreground_color_title"
+        android:dependency="custom_colors_enabled" />
+
+    <CheckBoxPreference
         android:key="disabled_for_low_priority"
         android:summary="@string/pref_priority_summary"
         android:title="@string/pref_priority_title" />

@@ -1,6 +1,7 @@
 package com.mohammadag.headsupenabler;
 
 import static de.robv.android.xposed.XposedHelpers.callMethod;
+import static de.robv.android.xposed.XposedHelpers.findAndHookConstructor;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.findConstructorExact;
@@ -17,18 +18,22 @@ import java.lang.reflect.Constructor;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.XModuleResources;
 import android.graphics.PixelFormat;
 import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -40,6 +45,7 @@ import de.robv.android.xposed.callbacks.XC_InitPackageResources.InitPackageResou
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackageResources, IXposedHookZygoteInit {
+	private static final String UPDATE_HEADS_UP_COLORS = "com.mohammadag.headsupenabler.UPDATE_HEADS_UP_COLORS";
 	private static SettingsHelper mSettingsHelper;
 	private static String MODULE_PATH;
 	private int mStatusBarVisibility;
@@ -75,14 +81,14 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 								// Ignore if we're not in a fullscreen app and the "only when fullscreen" setting is
 								// enabled
 								&& !(!((mStatusBarVisibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == View.SYSTEM_UI_FLAG_FULLSCREEN)
-									&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
+								&& mSettingsHelper.isEnabledOnlyWhenFullscreen())
 								// Ignore if phone is locked and the "only when unlocked" setting is enabled
 								&& !(keyguardManager.isKeyguardLocked() && mSettingsHelper.isEnabledOnlyWhenUnlocked())
 								// Screen must be on
 								&& powerManager.isScreenOn()
 								// Check if low priority
 								&& !(mSettingsHelper.isDisabledForLowPriority()
-									&& !(n.getNotification().priority > Notification.PRIORITY_LOW))
+								&& !(n.getNotification().priority > Notification.PRIORITY_LOW))
 								// Ignore blacklisted/non whitelisted packages
 								&& !mSettingsHelper.shouldIgnore(n.getPackageName());
 					}
@@ -113,7 +119,7 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 				Object expandHelper = null;
 				try {
-					 expandHelper = getObjectField(param.thisObject, "mExpandHelper");
+					expandHelper = getObjectField(param.thisObject, "mExpandHelper");
 				} catch (NoSuchFieldError e) {
 				}
 				if (android.os.Build.MANUFACTURER.equalsIgnoreCase("htc")
@@ -136,35 +142,35 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 					if (mHtcUnhook == null) {
 						mHtcUnhook = findAndHookMethod(HeadsUpNotificationView,
 								"onInterceptTouchEvent", MotionEvent.class, new XC_MethodReplacement() {
-							protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-								long mStartTouchTime = getLongField(param.thisObject, "mStartTouchTime");
-								if (System.currentTimeMillis() < mStartTouchTime) {
-									return true;
-								}
+									protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+										long mStartTouchTime = getLongField(param.thisObject, "mStartTouchTime");
+										if (System.currentTimeMillis() < mStartTouchTime) {
+											return true;
+										}
 
-								boolean result = (Boolean) XposedBridge.invokeOriginalMethod(param.method,
-										param.thisObject, param.args);
-								return result || (Boolean) callMethod(mHtcExpandHelper,
-										"onInterceptTouchEvent", param.args[0]);
-							}
-						});
+										boolean result = (Boolean) XposedBridge.invokeOriginalMethod(param.method,
+												param.thisObject, param.args);
+										return result || (Boolean) callMethod(mHtcExpandHelper,
+												"onInterceptTouchEvent", param.args[0]);
+									}
+								});
 
 						findAndHookMethod(HeadsUpNotificationView,
 								"onTouchEvent", MotionEvent.class, new XC_MethodReplacement() {
-							protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-								long mStartTouchTime = getLongField(param.thisObject, "mStartTouchTime");
-								if (System.currentTimeMillis() < mStartTouchTime) {
-									return false;
-								}
+									protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+										long mStartTouchTime = getLongField(param.thisObject, "mStartTouchTime");
+										if (System.currentTimeMillis() < mStartTouchTime) {
+											return false;
+										}
 
-								callMethod(getObjectField(param.thisObject, "mBar"), "resetHeadsUpDecayTimer");
-								boolean result = (Boolean) XposedBridge.invokeOriginalMethod(param.method,
-										param.thisObject, param.args);
+										callMethod(getObjectField(param.thisObject, "mBar"), "resetHeadsUpDecayTimer");
+										boolean result = (Boolean) XposedBridge.invokeOriginalMethod(param.method,
+												param.thisObject, param.args);
 
-								return result || (Boolean) callMethod(mHtcExpandHelper,
-										"onTouchEvent", param.args[0]);
-							}
-						});
+										return result || (Boolean) callMethod(mHtcExpandHelper,
+												"onTouchEvent", param.args[0]);
+									}
+								});
 					}
 				}
 
@@ -232,17 +238,54 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			}
 		});
 
-        /*
-        * Always expanded
-        */
-        findAndHookMethod(HeadsUpNotificationView, "setNotification", NotificationDataEntry, new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                Object headsUp = getObjectField(param.thisObject, "mHeadsUp");
-                FrameLayout row = (FrameLayout) getObjectField(headsUp, "row");
-                callMethod(row, "setExpanded", mSettingsHelper.isAlwaysExpanded());
-            }
-        });
+		/*
+		* Custom colors.
+		*/
+		findAndHookMethod(BaseStatusBar, "updateNotificationViews", NotificationDataEntry, StatusBarNotification.class,
+				new XC_MethodHook() {
+					@Override
+					protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+						Context context = (Context) getObjectField(param.thisObject, "mContext");
+						context.sendBroadcast(new Intent(UPDATE_HEADS_UP_COLORS));
+					}
+				});
+
+		findAndHookConstructor(HeadsUpNotificationView, Context.class, AttributeSet.class, int.class, new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+				Context context = (Context) param.args[0];
+				BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						Object headsUp = getObjectField(param.thisObject, "mHeadsUp");
+						if (headsUp != null && ((Integer) callMethod(param.thisObject, "getVisibility") == 0))
+							setHeadsUpColors(context, headsUp);
+					}
+				};
+				IntentFilter intentFilter = new IntentFilter(UPDATE_HEADS_UP_COLORS);
+				context.registerReceiver(broadcastReceiver, intentFilter);
+			}
+		});
+
+		findAndHookMethod(HeadsUpNotificationView, "setNotification", NotificationDataEntry, new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+				Context context = (Context) getObjectField(param.thisObject, "mContext");
+				setHeadsUpColors(context, param.args[0]);
+			}
+		});
+
+		/*
+		* Always expanded.
+		*/
+		findAndHookMethod(HeadsUpNotificationView, "setNotification", NotificationDataEntry, new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+				Object headsUp = getObjectField(param.thisObject, "mHeadsUp");
+				FrameLayout row = (FrameLayout) getObjectField(headsUp, "row");
+				callMethod(row, "setExpanded", mSettingsHelper.isAlwaysExpanded());
+			}
+		});
 
 		/*
 		* Halo
@@ -308,7 +351,6 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 			mSettingsHelper = new SettingsHelper();
 		}
 
-
 		// Set the delay before the Heads Up notification is hidden.
 		resparam.res.setReplacement("com.android.systemui", "integer", "heads_up_notification_decay",
 				mSettingsHelper.getHeadsUpNotificationDecay());
@@ -321,4 +363,36 @@ public class XposedMod implements IXposedHookLoadPackage, IXposedHookInitPackage
 		}
 	}
 
+	private void setViewsFgColor(View v, int color) {
+		if (v instanceof ViewGroup) {
+			ViewGroup view = (ViewGroup) v;
+			for (int i = 0; i < view.getChildCount(); i++) {
+				View child = view.getChildAt(i);
+				setViewsFgColor(child, color);
+			}
+		} else if (v instanceof TextView) {
+			TextView view = (TextView) v;
+			view.setTextColor(color);
+		}
+	}
+
+	private void setHeadsUpColors(Context context, Object headsUp) {
+		mSettingsHelper.reload();
+		if (!mSettingsHelper.areCustomColorsEnabled())
+			return;
+		FrameLayout row = (FrameLayout) getObjectField(headsUp, "row");
+		ViewGroup adaptive = (ViewGroup) row.findViewById(context.getResources().getIdentifier("adaptive", "id",
+				"com.android.systemui"));
+		int latestEventContentId = context.getResources().getIdentifier("status_bar_latest_event_content", "id",
+				"android");
+		for (int i = 0; i < adaptive.getChildCount(); i++) {
+			View child = adaptive.getChildAt(i);
+			// There are two status_bar_latest_event_content views if the notification can be
+			// expanded.
+			if (child.getId() == latestEventContentId) {
+				child.setBackgroundColor(mSettingsHelper.getBackgroundColor());
+				setViewsFgColor(child, mSettingsHelper.getForegroundColor());
+			}
+		}
+	}
 }

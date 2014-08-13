@@ -27,6 +27,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.mohammadag.headsupenabler.ColorPickerDialog"
+            android:theme="@android:style/Theme.Holo.Dialog" />
 
         <meta-data
             android:name="xposedmodule"

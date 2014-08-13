@@ -4,6 +4,7 @@ import java.util.HashSet;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.view.Gravity;
 import de.robv.android.xposed.XSharedPreferences;
 
@@ -94,9 +95,9 @@ public class SettingsHelper {
 		return mXSharedPreferences.getBoolean("enabled_only_when_unlocked", false);
 	}
 
-    public boolean isAlwaysExpanded() {
-        return mXSharedPreferences.getBoolean("always_expanded", false);
-    }
+	public boolean isAlwaysExpanded() {
+		return mXSharedPreferences.getBoolean("always_expanded", false);
+	}
 
 	public boolean shouldRemovePadding() {
 		return mXSharedPreferences.getBoolean("remove_padding", false);
@@ -113,5 +114,33 @@ public class SettingsHelper {
 
 	public boolean isHaloEnabled() {
 		return mXSharedPreferences.getBoolean("halo_enabled", false);
+	}
+
+	public boolean areCustomColorsEnabled() {
+		return mXSharedPreferences.getBoolean("custom_colors_enabled", false);
+	}
+
+	public int getBackgroundColor() {
+		if (mSharedPreferences != null)
+			return mSharedPreferences.getInt("background_color", Color.BLACK);
+		else if (mXSharedPreferences != null)
+			return mXSharedPreferences.getInt("background_color", Color.BLACK);
+		return Color.BLACK;
+	}
+
+	public void setBackgroundColor(int color) {
+		mSharedPreferences.edit().putInt("background_color", color).apply();
+	}
+
+	public int getForegroundColor() {
+		if (mSharedPreferences != null)
+			return mSharedPreferences.getInt("foreground_color", Color.WHITE);
+		else if (mXSharedPreferences != null)
+			return mXSharedPreferences.getInt("foreground_color", Color.WHITE);
+		return Color.BLACK;
+	}
+
+	public void setForegroundColor(int color) {
+		mSharedPreferences.edit().putInt("foreground_color", color).apply();
 	}
 }

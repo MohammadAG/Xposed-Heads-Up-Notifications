@@ -22,6 +22,9 @@
     <string name="pref_remove_padding_title">Remove Heads Up padding</string>
     <string name="pref_remove_padding_summary">Remove the padding on the sides of the Heads Up notification,
         and have it show on top of the status bar (a reboot is required to apply this option)</string>
+    <string name="pref_custom_colors_enabled_title">Use custom colors</string>
+    <string name="pref_background_color_title">Background color</string>
+    <string name="pref_foreground_color_title">Foreground color</string>
     <string name="pref_priority_title">Hide low priority notifications</string>
     <string name="pref_priority_summary">Hide notifications with low and minimum priority</string>
     <string name="pref_halo_title">Open in Halo</string>
@@ -31,5 +34,13 @@
     <string name="pref_gravity_top_title">Top</string>
     <string name="pref_gravity_bottom_title">Bottom</string>
     <string name="reboot_required">%1$s (a reboot is required to apply this option)</string>
+    <string name="saturation">Saturation</string>
+    <string name="value">Value</string>
+    <string name="opacity">Opacity</string>
+    <string name="hex">Hex Color</string>
+    <string name="apply">Apply</string>
+    <string name="invalid_color">Invalid Color</string>
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

@@ -1,5 +1,8 @@
 package com.mohammadag.headsupenabler;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -7,6 +10,11 @@ import android.preference.PreferenceActivity;
 
 public class SettingsActivity extends PreferenceActivity {
 	private static final String GRAVITY_TOP = "48";
+	private static final int BACKGROUND_COLOR_REQUEST = 0;
+	private static final int FOREGROUND_COLOR_REQUEST = 1;
+	private SettingsHelper mSettingsHelper;
+	private Preference mBackgroundColorPref;
+	private Preference mForegroundColorPref;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -14,6 +22,33 @@ public class SettingsActivity extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 		getPreferenceManager().setSharedPreferencesMode(MODE_WORLD_READABLE);
 		addPreferencesFromResource(R.xml.preferences);
+		mSettingsHelper = new SettingsHelper(this);
+
+		mBackgroundColorPref = findPreference("background_color");
+		mBackgroundColorPref.setSummary(ColorPickerDialog.colorIntToRGB(mSettingsHelper.getBackgroundColor()));
+		mBackgroundColorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				Intent intent = new Intent(SettingsActivity.this, ColorPickerDialog.class);
+				intent.putExtra("color", mSettingsHelper.getBackgroundColor());
+				intent.putExtra("title", R.string.pref_background_color_title);
+				startActivityForResult(intent, BACKGROUND_COLOR_REQUEST);
+				return true;
+			}
+		});
+
+		mForegroundColorPref = findPreference("foreground_color");
+		mForegroundColorPref.setSummary(ColorPickerDialog.colorIntToRGB(mSettingsHelper.getForegroundColor()));
+		mForegroundColorPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				Intent intent = new Intent(SettingsActivity.this, ColorPickerDialog.class);
+				intent.putExtra("color", mSettingsHelper.getForegroundColor());
+				intent.putExtra("title", R.string.pref_foreground_color_title);
+				startActivityForResult(intent, FOREGROUND_COLOR_REQUEST);
+				return true;
+			}
+		});
 
 		final ListPreference notificationFilterTypePref = (ListPreference) findPreference("notification_filter_type");
 		final Preference notificationList = findPreference("notification_list");
@@ -66,5 +101,23 @@ public class SettingsActivity extends PreferenceActivity {
 				return true;
 			}
 		});
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (resultCode == Activity.RESULT_CANCELED)
+			return;
+
+		if (requestCode == BACKGROUND_COLOR_REQUEST) {
+			int color = data.getIntExtra("color", Color.BLACK);
+			mSettingsHelper.setBackgroundColor(color);
+			mBackgroundColorPref.setSummary(ColorPickerDialog.colorIntToRGB(color));
+		} else if (requestCode == FOREGROUND_COLOR_REQUEST) {
+			int color = data.getIntExtra("color", Color.WHITE);
+			mSettingsHelper.setForegroundColor(color);
+			mForegroundColorPref.setSummary(ColorPickerDialog.colorIntToRGB(color));
+		}
 	}
 }
