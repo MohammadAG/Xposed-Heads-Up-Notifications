@@ -1,0 +1,29 @@
+<string name="app_name">Notificações Heads Up</string>
+    <string name="copyright_summary">Copyright © 2014 – MohammadAG / GermainZ\nVisit support thread</string>
+    <string name="loading">Carregando...</string>
+    <string name="heads_up_notification_decay_title">Atraso Notificação</string>
+    <string name="heads_up_notification_decay_summary">Atraso (em ms) antes de os Chefes notificação Up 
+        desaparece. A reinicialização é necessária para aplicar esta opção</string>
+    <string name="pref_filter_type_title">Filtragem Notificação</string>
+    <string name="pref_blacklist_title">Lista negra</string>
+    <string name="pref_blacklist_summary">Ignorar notificações de determinados aplicativos</string>
+    <string name="pref_whitelist_title">Lista branca</string>
+    <string name="pref_whitelist_summary">Mostrar apenas notificações de determinados aplicativos</string>
+    <string name="pref_ongoing_title">Notificações em curso</string>
+    <string name="pref_ongoing_summary">Ativar heads up para curso notificações (persistentes)</string>
+    <string name="pref_fullscreen_title">Somente quando fullscreen</string>
+    <string name="pref_fullscreen_summary">Ativar Heads Up somente quando em aplicativos em tela cheia</string>
+    <string name="pref_unlocked_title">Apenas quando está desbloqueado</string>
+    <string name="pref_unlocked_summary">Ativar Heads Up apenas quando o telefone é desbloqueado</string>
+    <string name="pref_remove_padding_title">Preenchimento Remover Heads Up</string>
+    <string name="pref_remove_padding_summary">Remova a cobertura nas laterais da notificação Heads Up, 
+        e tê-lo mostrar na parte superior da barra de status (a reinicialização é necessária para aplicar esta opção)</string>
+    <string name="pref_priority_title">Esconder notificações de baixa prioridade</string>
+    <string name="pref_priority_summary">Esconder notificações com prioridade baixa e mínima</string>
+    <string name="pref_halo_title">Aberto em Halo</string>
+    <string name="pref_halo_summary">Para ROMs com compatibilidade de Halo</string>
+    <string name="app_icon_cd">Ìcone do aplicativo</string>
+    <string name="pref_gravity_title">Notificação gravidade</string>
+    <string name="pref_gravity_top_title">Topo</string>
+    <string name="pref_gravity_bottom_title">Inferior</string>
+    <string name="reboot_required">%1$s (a reinicialização é necessária para aplicar esta opção)</string>
