@@ -1,0 +1,46 @@
+<resources>
+
+    <string name="app_name">Heads Up Notifications</string>
+    <string name="copyright_summary">Copyright © 2014 – MohammadAG / GermainZ\nVisit support thread</string>
+    <string name="loading">Loading…</string>
+    <string name="heads_up_notification_decay_title">Notification delay</string>
+    <string name="heads_up_notification_decay_summary">Delay (in ms) before the Heads Up notification
+        disappears. A reboot is required to apply this option</string>
+    <string name="pref_filter_type_title">Notification filtering</string>
+    <string name="pref_blacklist_title">Blacklist</string>
+    <string name="pref_blacklist_summary">Ignore notifications from certain apps</string>
+    <string name="pref_whitelist_title">Whitelist</string>
+    <string name="pref_whitelist_summary">Only show notifications from certain apps</string>
+    <string name="pref_ongoing_title">Ongoing notifications</string>
+    <string name="pref_ongoing_summary">Enable heads up for ongoing (persistent) notifications</string>
+    <string name="pref_fullscreen_title">Only when fullscreen</string>
+    <string name="pref_fullscreen_summary">Enable Heads Up only when in fullscreen apps</string>
+    <string name="pref_unlocked_title">Only when unlocked</string>
+    <string name="pref_unlocked_summary">Enable Heads Up only when phone is unlocked</string>
+    <string name="pref_always_expanded_title">Always expanded</string>
+    <string name="pref_always_expanded_summary">Automatically expand Heads Up notifications</string>
+    <string name="pref_remove_padding_title">Remove Heads Up padding</string>
+    <string name="pref_remove_padding_summary">Remove the padding on the sides of the Heads Up notification,
+        and have it show on top of the status bar (a reboot is required to apply this option)</string>
+    <string name="pref_custom_colors_enabled_title">Use custom colors</string>
+    <string name="pref_background_color_title">Background color</string>
+    <string name="pref_foreground_color_title">Foreground color</string>
+    <string name="pref_priority_title">Hide low priority notifications</string>
+    <string name="pref_priority_summary">Hide notifications with low and minimum priority</string>
+    <string name="pref_halo_title">Open in Halo</string>
+    <string name="pref_halo_summary">For ROMs with Halo compatibility</string>
+    <string name="app_icon_cd">Application icon</string>
+    <string name="pref_gravity_title">Notification gravity</string>
+    <string name="pref_gravity_top_title">Top</string>
+    <string name="pref_gravity_bottom_title">Bottom</string>
+    <string name="reboot_required">%1$s (a reboot is required to apply this option)</string>
+    <string name="saturation">Saturation</string>
+    <string name="value">Value</string>
+    <string name="opacity">Opacity</string>
+    <string name="hex">Hex Color</string>
+    <string name="apply">Apply</string>
+    <string name="invalid_color">Invalid Color</string>
+    <string name="done">Done</string>
+    <string name="cancel">Cancel</string>
+
+</resources>
