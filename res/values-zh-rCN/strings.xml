@@ -1,9 +1,9 @@
 <resources>
 
-    <string name="app_name">抬头通知</string>
+    <string name="app_name">浮动通知</string>
     <string name="loading">加载中…</string>
     <string name="heads_up_notification_decay_title">通知延时</string>
-    <string name="heads_up_notification_decay_summary">抬头通知持续时间(ms为单位)，重启后生效</string>
+    <string name="heads_up_notification_decay_summary">浮动通知持续时间(ms为单位)，重启后生效</string>
     <string name="pref_filter_type_title">通知过滤</string>
     <string name="pref_blacklist_title">黑名单</string>
     <string name="pref_blacklist_summary">忽略黑名单中apps的通知</string>
@@ -12,13 +12,13 @@
     <string name="pref_ongoing_title">持续通知</string>
     <string name="pref_ongoing_summary">允许抬头显示持续(固定)的通知</string>
     <string name="pref_fullscreen_title">仅全屏时</string>
-    <string name="pref_fullscreen_summary">仅在全屏应用中启用抬头通知</string>
+    <string name="pref_fullscreen_summary">仅在全屏应用中启用浮动通知</string>
     <string name="pref_unlocked_title">仅解锁时</string>
-    <string name="pref_unlocked_summary">仅在手机处于解锁状态时启用抬头通知</string>
+    <string name="pref_unlocked_summary">仅在手机处于解锁状态时启用浮动通知</string>
     <string name="pref_always_expanded_title">总是展开</string>
-    <string name="pref_always_expanded_summary">自动展开抬头通知</string>
+    <string name="pref_always_expanded_summary">自动展开浮动通知</string>
     <string name="pref_remove_padding_title">移除填充</string>
-    <string name="pref_remove_padding_summary">移除抬头通知周围的填充,并将其显示在状态栏的上方 (重启后生效)</string>
+    <string name="pref_remove_padding_summary">移除浮动通知周围的填充,并将其显示在状态栏的上方 (重启后生效)</string>
     <string name="pref_custom_colors_enabled_title">自定义颜色</string>
     <string name="pref_background_color_title">背景颜色</string>
     <string name="pref_foreground_color_title">前景颜色</string>
@@ -27,7 +27,7 @@
     <string name="pref_halo_title">用Halo打开</string>
     <string name="pref_halo_summary">仅适用于兼容Halo的ROMs</string>
     <string name="app_icon_cd">程序图标</string>
-    <string name="pref_gravity_title">通知位置</string>
+    <string name="pref_gravity_title">浮动通知位置</string>
     <string name="pref_gravity_top_title">顶部</string>
     <string name="pref_gravity_bottom_title">底部</string>
     <string name="reboot_required">%1$s (重启后生效)</string>
