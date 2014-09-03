@@ -1,0 +1,46 @@
+<resources>
+
+    <string name="app_name">Heads Up Notifications</string>
+    <string name="copyright_summary">Copyright © 2014 – MohammadAG / GermainZ\nAppuyez pour accéder au topic</string>
+    <string name="loading">Chargement…</string>
+    <string name="heads_up_notification_decay_title">Délai de notification</string>
+    <string name="heads_up_notification_decay_summary">Temps (en ms) avant que la notification flottante
+        disparaisse (redémarrez pour appliquer cette option)</string>
+    <string name="pref_filter_type_title">Filtre de notification</string>
+    <string name="pref_blacklist_title">Liste noire</string>
+    <string name="pref_blacklist_summary">Ignorer les notifications de certaines applis</string>
+    <string name="pref_whitelist_title">Liste blanche</string>
+    <string name="pref_whitelist_summary">Afficher les notifications de certaines applis</string>
+    <string name="pref_ongoing_title">Notifications en cours</string>
+    <string name="pref_ongoing_summary">Activer les notifications flottantes pour les notifications en cours (inamovible)</string>
+    <string name="pref_fullscreen_title">Plein écran uniquement</string>
+    <string name="pref_fullscreen_summary">Activer les notifications flottantes uniquement en plein écran</string>
+    <string name="pref_unlocked_title">Déverrouillé uniquement</string>
+    <string name="pref_unlocked_summary">Activer les notifications flottantes uniquement quand le téléphone est déverrouillé</string>
+    <string name="pref_always_expanded_title">Toujours étendu</string>
+    <string name="pref_always_expanded_summary">Étendre automatiquement les notifications flottantes</string>
+    <string name="pref_remove_padding_title">Supprimer les espaces</string>
+    <string name="pref_remove_padding_summary">Supprimer les espaces sur les côtés de la notification flottante,
+        et l\'avoir afficher sur le dessus de la barre d\'état (redémarrez pour appliquer cette option)</string>
+    <string name="pref_custom_colors_enabled_title">Utiliser des couleurs personnalisées</string>
+    <string name="pref_background_color_title">Couleur de fond</string>
+    <string name="pref_foreground_color_title">Couleur de frond</string>
+    <string name="pref_priority_title">Masquer les notifications de faible priorité</string>
+    <string name="pref_priority_summary">Masquer les notifications avec une priorité faible et minimale</string>
+    <string name="pref_halo_title">Ouvrir dans Halo</string>
+    <string name="pref_halo_summary">Pour les ROMs compatiblent avec Halo</string>
+    <string name="app_icon_cd">Icône de l\'application</string>
+    <string name="pref_gravity_title">Position de la notification</string>
+    <string name="pref_gravity_top_title">Haut</string>
+    <string name="pref_gravity_bottom_title">Bas</string>
+    <string name="reboot_required">%1$s (redémarrez pour appliquer cette option)</string>
+    <string name="saturation">Saturation</string>
+    <string name="value">Valeur</string>
+    <string name="opacity">Opacité</string>
+    <string name="hex">Couleur hex</string>
+    <string name="apply">Appliquer</string>
+    <string name="invalid_color">Couleur invalide</string>
+    <string name="done">OK</string>
+    <string name="cancel">Annuler</string>
+
+</resources>
