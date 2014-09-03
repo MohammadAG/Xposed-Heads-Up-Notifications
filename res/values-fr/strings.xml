@@ -14,9 +14,9 @@
     <string name="pref_ongoing_title">Notifications en cours</string>
     <string name="pref_ongoing_summary">Activer les notifications flottantes pour les notifications en cours (inamovible)</string>
     <string name="pref_fullscreen_title">Plein écran uniquement</string>
-    <string name="pref_fullscreen_summary">Activer Heads Up uniquement en plein écran</string>
+    <string name="pref_fullscreen_summary">Activer les notifications flottantes uniquement en plein écran</string>
     <string name="pref_unlocked_title">Déverrouillé uniquement</string>
-    <string name="pref_unlocked_summary">Activer Heads Up uniquement quand le téléphone est déverrouillé</string>
+    <string name="pref_unlocked_summary">Activer les notifications flottantes uniquement quand le téléphone est déverrouillé</string>
     <string name="pref_always_expanded_title">Toujours étendu</string>
     <string name="pref_always_expanded_summary">Étendre automatiquement les notifications flottantes</string>
     <string name="pref_remove_padding_title">Supprimer les espaces</string>
